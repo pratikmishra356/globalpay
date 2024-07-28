@@ -1,0 +1,30 @@
+version: "3.4"
+
+services:
+  web:
+    build: .
+    env_file: .env
+    ports:
+      - "8070:8070"
+    depends_on:
+      postgres:
+          condition: service_healthy
+          restart: true
+    command: ["/app/globalpay"]
+  postgres:
+    build: ./docker-compose/postgres/
+    container_name: globalpay_postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: "docker"
+      POSTGRES_DB: "globalpay"
+      POSTGRES_USER: "globalpay"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U globalpay"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    restart: on-failure
+
